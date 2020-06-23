@@ -7,3 +7,5 @@ To use it, include `slovarik-release.el` into a path which Emacs can find.
 
 ## Usage
 Point your text cursor and `C-c C-v` to look up a word.
+
+![](slovarik-demo.gif)

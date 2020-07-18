@@ -1,3 +1,18 @@
+;; Copyright (c) 2020 kirthip
+
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 (require 'ansi-color)
 (require 'subr-x)
 
@@ -13,11 +28,6 @@
 (load "conjunctions")
 
 (load "stemmer")
-
-;; todo
-;; normalize dict keys to contains only e's and no e:'s
-;; then lookup will be fast, but in definition disambiguate
-;; there are only around 2k guys
 
 ;; user controls
 (define-minor-mode slovarik-mode
@@ -53,11 +63,6 @@
 
 (defun print-list (l title)
   (if l (print-elements-of-list l title)))
-
-;; usually the stem is shorter than the word being checked
-;; (defun stem-to-word-length-ratio (stemword word)
-;;   (let ((ratio (/ (length stemword) (float (length word)))))
-;;     (and (> ratio 0.25) (<= ratio 1))))
 
 (defun stem-to-word-length-ratio (stemword word) t)
 
@@ -97,13 +102,6 @@
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 3)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
-;; old
-;; (defun slovarik-lookup (word wordlist deflist)
-;;   (let* ((search-res (slovarik-find-words word wordlist))
-;; 	 (words-res (mapcar (lambda (i) (list (aref wordlist i) i)) search-res))
-;; 	 (topresults (seq-take (sort results (lambda (w i) (length w))) 3)))
-;;     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
-
 ;; search with the wordlist, but use the otherlist for resulting keys
 (defun slovarik-lookup-with-otherlist (word wordlist deflist otherlist)
   (let* ((search-res (slovarik-find-words word wordlist))
@@ -111,8 +109,6 @@
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
-;; ideally, lookup all wordlists
-;; have master wordlist
 (defun user-lookup (word)
   (if (is-cyrillic-word word)
   (let ((noun-hits (slovarik-lookup word slovarik-nouns slovarik-nouns-defs))

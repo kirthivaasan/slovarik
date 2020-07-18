@@ -8,17 +8,14 @@
 (defun is-cyr-char (c) (or (and (>= c 1072) (<= c 1103)) (= c 45) (= c 1105)))
 (defun is-cyrillic-word (word)
   (seq-reduce (lambda (acc c) (and acc (is-cyr-char c))) (downcase word) t))
-?0
-?9
 
 ;; maybe use a char-table instead?
 (setq alphabet "абвгдежзийклмнопрстуфхцчшщъыьэюя ё")
 (setq vowels   "1000010010000010000100000001011101")
 ;(setq vowels (bool-vector t nil ...)
-			    
-(defun is-vowel (c) 
+
+(defun is-vowel (c)
        (eq (aref "1" 0) (aref vowels (- c 1072))))
-(is-vowel (aref "у" 0))
 
 (setq perfective-gerund-g1 ["вшись" "вши" "в"])
 (setq perfective-gerund-g2 ["ывшись" "ившись" "ывши" "ивши" "ив" "ыв"])
@@ -29,7 +26,7 @@
 (setq participle-g1 ["ем" "нн" "вш" "ющ" "щ"])
 (setq participle-g2 ["ивш" "ывш" "ующ"])
 
-;; manually compiled list of all  possible adjective endings in wiktionary 
+;; manually compiled list of all  possible adjective endings in wiktionary
 (setq adjective ["аемое" "аемый" "яемое" "яемый" "аннее" "анное" "анные" "анней" "анний" "анный" "анной" "анном" "анных" "анная" "анною" "янный" "янной" "янная" "авший" "явший" "ающее" "ающие" "ающий" "ающая" "яющее" "яющий" "яющая" "ившее" "ивший" "ывший" "ующее" "ующие" "ующей" "ующий" "ующим" "ующая" "ующею" "емого" "нному" "ннего" "нного" "ящему" "ящего" "вшего" "емое" "емей" "емый" "емой" "ннее" "нное" "нные" "нней" "нний" "нный" "нной" "нным" "нном" "нних" "нных" "нную" "нная" "нняя" "нною" "вшее" "вший" "вшая" "ющее" "ющие" "ющей" "ющий" "ющим" "ющая" "ющею" "ащее" "ащий" "ащем" "ящее" "ящей" "ящий" "ящем" "ящая" "ящею" "щему" "щего" "щее" "щие" "щей" "щий" "щем" "щим" "щая" "щею" "ими" "ыми" "ему" "ому" "его" "ого" "ее" "ие" "ое" "ые" "ей" "ий" "ый" "ой" "ем" "им" "ым" "ом" "их" "ых" "ую" "юю" "ая" "яя" "ою" "ею"])
 
 ;; any g1 must follow either а or я
@@ -45,7 +42,6 @@
 (setq derivational ["ость" "ост"])
 
 ;; an adjectival ending is an adjectival ending optionally preceded by a participle ending
-
 (defun rv-search (l)
 (dotimes (i (length l))
   (when (is-vowel (aref l i))
@@ -54,9 +50,6 @@
 (defun rv (l)
   (let ((idx (rv-search l)))
     (if idx idx (length l))))
-
-;; (rv "дллавдл")
-;; (rv "дллввдд")
 
 (defun r1-search (l)
   (let ((si (rv l)))
@@ -68,10 +61,6 @@
   (let ((idx (r1-search l)))
     (if idx idx (length l))))
 
-;; (r1-search "дллаовдл")
-;; (r1-search "дллввдд")
-
-
 (defun r2-search (l)
   (let ((si (r1 l)))
     (dotimes (i (length l))
@@ -81,9 +70,6 @@
 (defun r2 (l)
   (let ((idx (r2-search l)))
     (if idx idx (length l))))
-
-;; (r2-search "дллаовдоад")
-;; (r2-search "дллавдлд")
 
 (defun has-ending (word suffixes)
   (cl-some (lambda (suffix) (string-suffix-p suffix word)) suffixes))
@@ -112,15 +98,6 @@
 (defun remove-n-fromend (word n)
   (substring word 0 (- (length word) n)))
 
-;; (remove-n-fromend "abcdefg" 3)
-
-;; (which-ending "погибатс" reflexive)
-
-;; (which-ending "погибатив" perfective-gerund-g2)
-;; (which-ending-g1 "погибатяв" perfective-gerund-g1)
-
-;; (has-verb-ending "желаете")
-
 (defun remove-ending (word get-ending)
   (remove-n-fromend word (length (funcall get-ending word))))
 
@@ -137,7 +114,7 @@
 (defun get-reflex-end (word)
   (let ((i (which-ending word reflexive)))
     (cond (i (aref reflexive i)))))
-		   
+
 (defun remove-reflex (word)
   (remove-ending word 'get-reflex-end))
 
@@ -194,7 +171,7 @@
 (defun get-derivational (word)
   (let ((i (which-ending word derivational)))
     (cond (i (aref derivational i)))))
-  
+
 (defun remove-derivational (word)
     (if (r2-search word) (remove-ending word 'get-derivational) word))
 
@@ -231,17 +208,7 @@
 ;; and if one is found, remove it.
 
 ;; Step 4: (1) Undouble н (n), or, (2) if the word ends with a SUPERLATIVE ending,
-;; remove it and undouble н (n), or (3) if the word ends ь (') (soft sign) remove it. 
-
-;; (defun step1 (word)
-;;   (if (remove-perfective))
-
-;; (remove-reflex "пытатсвыа")
-;; (remove-pge "влао")
- 
-;; (defun step1 (word)
-;;   (if (< (length (remove-pge word)) (length word)) (remove-pge word)
-;;     (remove-noun (remove-verb (remove-adj (remove-reflex word))))))
+;; remove it and undouble н (n), or (3) if the word ends ь (') (soft sign) remove it.
 
 ;; TODO
 ;; instead of breaking at any true cond(itions), check to see who has
@@ -251,26 +218,6 @@
     (cond ((< (length (remove-noun word)) l) (remove-noun word))
 	  ((< (length (remove-verb word)) l) (remove-verb word))
 	  ((< (length (remove-adj word)) l) (remove-adj word)))))
-
-;; (defun part1 (word)
-;;   (let ((word (remove-reflex word))
-;; 	(l (length word))
-;; 	(nl (length (remove-noun word)))
-;; 	(vl (length (remove-verb word)))
-;; 	(al (length (remove-adj word)))
-;; 	(longest (max nl vl al)))
-;;     (cond ((= m nl) (remove-noun word))
-;; 	  ((= m nl) (remove-verb word))
-;; 	  ((= m nl) (remove-adj word)))))
-
-;; (step1 "пытатсвыа")
-;; (step1 "пытатсвыа")
-;; (step1 "может")
-
-;; (defun step1 (word)
-;;   (if (< (length (remove-pge word)) (length word)) (remove-pge word)
-;;     (let ((p1res (part word)))
-;;       (if p1res p1res word))))
 
 
 (defun step1 (word)
@@ -292,9 +239,6 @@
   (let ((word (downcase (string-trim word)))) (step4 (step3 (step2 (step1 word))))))
 
 
-;; ;; unrelated
-;; (split-string "foo bar baz" " ")
-
 ;; DEPREFIXER
 (defun remove-n-frombeg (word n)
   (substring word n (length word)))
@@ -308,4 +252,3 @@
 
 (defun remove-prefix (word)
   (remove-n-frombeg word (length (aref prefixes (get-prefix word)))))
-

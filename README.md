@@ -10,11 +10,12 @@ Installing slovarik is very quick and easy, just run this one-liner command:
 
 `$(EMACS=~/.emacs.d; mkdir -p $EMACS/slovarik; cd $EMACS/slovarik; wget https://raw.githubusercontent.com/kirthivaasan/slovarik/master/slovarik.el; cd ..; echo -e "(add-to-list 'load-path \"~/.emacs.d/slovarik/\")\n(load \"slovarik\")" >> init.el;)`
 
-And enable the mode by running:
+## Usage
+
+Enable the mode by running:
 
 `M-x slovarik-mode`
 
-## Usage
 Point your text cursor and `C-c C-v` to look up a word.
 
 ![](slovarik-demo.gif)

@@ -126,8 +126,6 @@
 (defun remove-adj (word)
   (remove-ending word 'get-adj-end))
 
-;(remove-adj "жалкий")
-
 ;; remove verb ending
 (defun get-verb-end (word)
   (let ((i1 (which-ending-g1 word verb-g1))
@@ -146,27 +144,8 @@
 (defun remove-noun (word)
   (remove-ending word 'get-noun-end))
 
-
-;; (remove-reflex "авшись") ;; works but since we should've remove gerunds first this case should never happen
-
-;; (remove-pge "вшись")
-;; (remove-pge "ывлаоывшись")
-;; (remove-pge "ывлаоывшись")
-
-
-;; (remove-adj "высокий")
-;; (remove-adj "высокает")
-
-;; (remove-verb "спрашивает")
-
-;; (remove-noun "собаками")
-
-
 (defun remove-i (word)
   (if (string-suffix-p "и" word) (remove-n-fromend word 1) word))
-
-;(remove-i "адвлайи")
-
 
 (defun get-derivational (word)
   (let ((i (which-ending word derivational)))
@@ -175,16 +154,9 @@
 (defun remove-derivational (word)
     (if (r2-search word) (remove-ending word 'get-derivational) word))
 
-
-;; (get-derivational "чудаковатость")
-;; (remove-derivational "чаость")
-;; (remove-derivational "раздельность")
-
-
 (defun undouble-n (word)
   (if (string-suffix-p "нн" word) (remove-n-fromend word 1) word))
 
-;; remove superlative ending
 (defun get-super-end (word)
   (let ((i (which-ending word superlative)))
     (cond (i (aref superlative i)))))
@@ -218,7 +190,6 @@
     (cond ((< (length (remove-noun word)) l) (remove-noun word))
 	  ((< (length (remove-verb word)) l) (remove-verb word))
 	  ((< (length (remove-adj word)) l) (remove-adj word)))))
-
 
 (defun step1 (word)
   (if (< (length (remove-pge word)) (length word)) (remove-pge word)

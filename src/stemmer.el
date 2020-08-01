@@ -189,7 +189,7 @@
 	  (adj-stem-length (length (remove-adj word))))
       (if (< noun-stem-length verb-stem-length)
 	  (if (< noun-stem-length adj-stem-length) (remove-noun word) (remove-adj word))
-	(if (< verb-stem-length < adj-stem-length) (remove-verb word) (remove-adj word))))))
+	(if (< verb-stem-length adj-stem-length) (remove-verb word) (remove-adj word))))))
 
 (defun step1 (word)
   (if (< (length (remove-pge word)) (length word)) (remove-pge word)

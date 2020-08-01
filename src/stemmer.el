@@ -21,7 +21,7 @@
 (setq perfective-gerund-g2 ["ывшись" "ившись" "ывши" "ивши" "ив" "ыв"])
 
 
-(setq adjective ["ими" "ыми" "ему" "ому" "его" "ого" "ее" "ие" "ое" "ые" "ей" "ий" "ый" "ой" "ем" "им" "ым" "ом" "их" "ых" "ую" "юю" "ая" "яя" "ою" "ею"])
+;; (setq adjective ["ими" "ыми" "ему" "ому" "его" "ого" "ее" "ие" "ое" "ые" "ей" "ий" "ый" "ой" "ем" "им" "ым" "ом" "их" "ых" "ую" "юю" "ая" "яя" "ою" "ею"])
 
 (setq participle-g1 ["ем" "нн" "вш" "ющ" "щ"])
 (setq participle-g2 ["ивш" "ывш" "ующ"])
@@ -182,14 +182,14 @@
 ;; Step 4: (1) Undouble н (n), or, (2) if the word ends with a SUPERLATIVE ending,
 ;; remove it and undouble н (n), or (3) if the word ends ь (') (soft sign) remove it.
 
-;; TODO
-;; instead of breaking at any true cond(itions), check to see who has
-;; the longest trimmed length and use that
 (defun part1 (word)
   (let ((word (remove-reflex word)) (l (length word)))
-    (cond ((< (length (remove-noun word)) l) (remove-noun word))
-	  ((< (length (remove-verb word)) l) (remove-verb word))
-	  ((< (length (remove-adj word)) l) (remove-adj word)))))
+    (let ((noun-stem-length (length (remove-noun word)))
+	  (verb-stem-length (length (remove-verb word)))
+	  (adj-stem-length (length (remove-adj word))))
+      (if (< noun-stem-length verb-stem-length)
+	  (if (< noun-stem-length adj-stem-length) (remove-noun word) (remove-adj word))
+	(if (< verb-stem-length < adj-stem-length) (remove-verb word) (remove-adj word))))))
 
 (defun step1 (word)
   (if (< (length (remove-pge word)) (length word)) (remove-pge word)

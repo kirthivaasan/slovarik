@@ -19,4 +19,4 @@ Enable the mode by running:
 
 Point your text cursor and `C-c C-v` to look up a word.
 
-![](slovarik-demo.gif)
+![](demo.gif)

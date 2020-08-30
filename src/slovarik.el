@@ -49,6 +49,12 @@
   (message (concat "Searching for " (thing-at-point 'word)))
   (user-lookup (thing-at-point 'word)))
 
+(defun slovarik-user-lookup ()
+  (interactive)
+  (setq user-query (read-string "Enter word: "))
+  (message (concat "Searching for " user-query))
+  (user-lookup user-query))
+
 (setq slovarik--buffer "*slovarik*")
 
 (defun print-elements-of-list (l title)
@@ -96,14 +102,14 @@
 	(setq results (cons i results))))
   results)
 
-(defun slovarik-lookup (word wordlist deflist)
+(defun slovarik-lookup-list (word wordlist deflist)
   (let* ((search-res (slovarik-find-words word wordlist))
 	 (words-res (mapcar (lambda (i) (list (aref wordlist i) i)) search-res))
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 3)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
 ;; search with the wordlist, but use the otherlist for resulting keys
-(defun slovarik-lookup-with-otherlist (word wordlist deflist otherlist)
+(defun slovarik-lookup-list-with-otherlist (word wordlist deflist otherlist)
   (let* ((search-res (slovarik-find-words word wordlist))
 	 (words-res (mapcar (lambda (i) (list (aref otherlist i) i)) search-res))
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
@@ -111,18 +117,18 @@
 
 (defun user-lookup (word)
   (if (is-cyrillic-word word)
-  (let ((noun-hits (slovarik-lookup word slovarik-nouns slovarik-nouns-defs))
-	(verb-hits (slovarik-lookup word slovarik-verbs slovarik-verbs-defs))
-	(infl-hits (slovarik-lookup-with-otherlist word slovarik-inflections slovarik-verbs-defs slovarik-verbs))
-	(adj-hits (slovarik-lookup word slovarik-adjectives slovarik-adjectives-defs))
-	(adverb-hits (slovarik-lookup word slovarik-adverbs slovarik-adverbs-defs))
-	(pronoun-hits (slovarik-lookup word slovarik-pronouns slovarik-pronouns-defs))
-	(conjunction-hits (slovarik-lookup word slovarik-conjunctions slovarik-conjunctions-defs))
-	(prep-hits (slovarik-lookup word slovarik-prepositions slovarik-prepositions-defs)))
+  (let ((noun-hits (slovarik-lookup-list word slovarik-nouns slovarik-nouns-defs))
+	(verb-hits (slovarik-lookup-list word slovarik-verbs slovarik-verbs-defs))
+	(infl-hits (slovarik-lookup-list-with-otherlist word slovarik-inflections slovarik-verbs-defs slovarik-verbs))
+	(adj-hits (slovarik-lookup-list word slovarik-adjectives slovarik-adjectives-defs))
+	(adverb-hits (slovarik-lookup-list word slovarik-adverbs slovarik-adverbs-defs))
+	(pronoun-hits (slovarik-lookup-list word slovarik-pronouns slovarik-pronouns-defs))
+	(conjunction-hits (slovarik-lookup-list word slovarik-conjunctions slovarik-conjunctions-defs))
+	(prep-hits (slovarik-lookup-list word slovarik-prepositions slovarik-prepositions-defs)))
     (with-output-to-temp-buffer slovarik--buffer
       (print-list noun-hits "[noun]")
       (print-list verb-hits "[verb]")
-      (print-list infl-hits "[inflection]")
+      (print-list infl-hits "[verbal inflection]")
       (print-list adverb-hits "[adverb]")
       (print-list pronoun-hits "[pronoun]")
       (print-list conjunction-hits "[conjunction]")

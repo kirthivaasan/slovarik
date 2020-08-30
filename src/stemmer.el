@@ -5,7 +5,7 @@
 (require 'cl)
 ;;45 are dashes, ?ё=1105
 ;; todo add other encodings (e.g. windows 1251)
-(defun is-cyr-char (c) (or (and (>= c 1072) (<= c 1105)) (= c 45)))
+(defun is-cyr-char (c) (or (and (>= c 1072) (<= c 1105)) (= c 45) (= c 32)))
 (defun is-cyrillic-word (word)
   (seq-reduce (lambda (acc c) (and acc (is-cyr-char c))) (downcase word) t))
 
@@ -15,7 +15,7 @@
 ;(setq vowels (bool-vector t nil ...)
 
 (defun is-vowel (c)
-  (if (and (is-cyr-char c) (not (= c 45)))
+  (if (and (is-cyr-char c) (not (= c 45)) (not (= c 32)))
       (eq (aref "1" 0) (aref vowels (- c 1072)))))
 
 (setq perfective-gerund-g1 ["вшись" "вши" "в"])

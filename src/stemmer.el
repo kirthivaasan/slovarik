@@ -9,6 +9,12 @@
 (defun is-cyrillic-word (word)
   (seq-reduce (lambda (acc c) (and acc (is-cyr-char c))) (downcase word) t))
 
+(defun replace-in-string (what with in)
+  (replace-regexp-in-string (regexp-quote what) with in nil 'literal))
+
+(defun remove-stress-symbol (s)
+  (replace-in-string "́" "" s))
+
 ;; maybe use a char-table instead?
 (setq alphabet "абвгдежзийклмнопрстуфхцчшщъыьэюяѐё")
 (setq vowels   "1000010010000010000100000001011111")

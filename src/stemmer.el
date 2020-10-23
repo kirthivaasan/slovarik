@@ -16,8 +16,8 @@
   (replace-in-string "́" "" s))
 
 ;; maybe use a char-table instead?
-(setq alphabet "абвгдежзийклмнопрстуфхцчшщъыьэюяѐё")
-(setq vowels   "1000010010000010000100000001011111")
+(setq alphabet "абвгдежзийклмнопрстуфхцчшщъыьэюяѐё-")
+(setq vowels   "10000100100000100001000000010111110")
 ;(setq vowels (bool-vector t nil ...)
 
 (defun is-vowel (c)

@@ -137,3 +137,54 @@
 	  ))
     (message "Not russian word")
     ))
+
+
+;; punctuation
+(setq punctuation ["." "," "!" "'" "\"" ":" "?" "«" "»" "—" "*" "/" "+" "#" "@"])
+
+(defun add-spaces-to-punctuation (text)
+  (seq-reduce (lambda (clean_text c) (replace-in-string c (concat " " c " ") clean_text))  punctuation text))
+
+(defun remove-spaces-from-punctuation (text)
+  (seq-reduce (lambda (clean_text c) (replace-in-string (concat " " c) c clean_text))  punctuation text))
+
+
+; tokenizes highlighted region
+(defun tokenize-text-by-spaces (text)
+  (split-string (add-spaces-to-punctuation text)))
+
+(defun slovarik-tokenize-region (x y)
+  (interactive "r")
+  (print (tokenize-text-by-spaces (buffer-substring-no-properties x y))))
+
+; applies function to text region, token by token
+(defun apply-func-text (func text)
+  (remove-spaces-from-punctuation (mapconcat 'identity (seq-map func (tokenize-text-by-spaces text)) " ")))
+
+
+;; russian romanization
+;; https://en.wikipedia.org/wiki/Romanization_of_Russian (passport 2013 ICAO convention)
+(setq roman-table ["a" "b" "v" "g" "d" "e" "zh" "z" "i" "i" "k" "l" "m" "n" "o" "p" "r" "s" "t" "u" "f" "kh" "ts" "ch" "sh" "shch" "ie" "y" "'" "e" "iu" "ia" "e" "e" "-"])
+
+;; this logic has to be fixed. a dash is not a cyr-char although it appears in russian words
+(defun cyr-to-roman (c)
+  (if (is-cyr-char c)
+    (if (= c 45) "-"
+      (aref roman-table (- c 1072)))
+    c))
+
+(defun romanize-word (word)
+  (if (is-cyrillic-word (remove-stress-symbol word))
+      (let ((norm-word (remove-stress-symbol (downcase word))))
+	(seq-reduce
+	 (lambda (acc c) (concat acc (cyr-to-roman c))) norm-word ""))
+    word))
+
+(defun slovarik-romanize ()
+  (interactive)
+  (message (romanize-word (thing-at-point 'word))))
+
+(defun slovarik-romanize-region (x y)
+  (interactive "r")
+  (with-output-to-temp-buffer slovarik--buffer
+      (print (apply-func-text 'romanize-word (buffer-substring-no-properties x y)))))

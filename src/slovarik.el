@@ -184,7 +184,28 @@
   (interactive)
   (message (romanize-word (thing-at-point 'word))))
 
+(defun slovarik-romanize-text (text)
+  (apply-func-text 'romanize-word text))
+
 (defun slovarik-romanize-region (x y)
   (interactive "r")
   (with-output-to-temp-buffer slovarik--buffer
-      (print (apply-func-text 'romanize-word (buffer-substring-no-properties x y)))))
+    (print (slovarik-romanize-text (buffer-substring-no-properties x y)))))
+
+
+;; todo
+;; define allowable chars for tts and filter out all others that don't fit/substitute them
+(defun remove-newlines (text)
+  (remove-punctuation (replace-in-string "\n" " " text)))
+
+(defun remove-punctuation (text)
+  (replace-in-string "]" " " (replace-in-string "[" " " (replace-in-string ";" "," text))))
+
+; Aleksandr/Anna/Artemiy/Elena/Irina
+(setq rhvoice-voice-name "Artemiy")
+
+(defun slovarik-rhvoice-tts (x y)
+  (interactive "r")
+  (with-output-to-temp-buffer slovarik--buffer
+    (let ((cmd (concat "echo «" (remove-newlines (buffer-substring-no-properties x y)) "»|RHVoice-test -p " rhvoice-voice-name)))
+      (shell-command cmd))))

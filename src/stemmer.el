@@ -13,7 +13,7 @@
   (replace-regexp-in-string (regexp-quote what) with in nil 'literal))
 
 (defun remove-stress-symbol (s)
-  (replace-in-string "́" "" s))
+  (replace-in-string "ѐ" "е" (replace-in-string "́" "" s)))
 
 ;; maybe use a char-table instead?
 (setq alphabet "абвгдежзийклмнопрстуфхцчшщъыьэюяѐё-")

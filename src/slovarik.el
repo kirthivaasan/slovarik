@@ -1,3 +1,4 @@
+
 ;; Copyright (c) 2020 kirthip
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -126,7 +127,7 @@
 	     (conjunction-hits (slovarik-lookup-list word slovarik-conjunctions slovarik-conjunctions-defs))
 	     (prep-hits (slovarik-lookup-list word slovarik-prepositions slovarik-prepositions-defs)))
 	(with-output-to-temp-buffer slovarik--buffer
-	  (print-list noun-hits "[noun]")
+	  (print-list noun-hits "[NOUN]")
 	  (print-list verb-hits "[verb]")
 	  (print-list infl-hits "[verbal inflection]")
 	  (print-list adverb-hits "[adverb]")
@@ -202,10 +203,24 @@
   (replace-in-string "]" " " (replace-in-string "[" " " (replace-in-string ";" "," text))))
 
 ; Aleksandr/Anna/Artemiy/Elena/Irina
-(setq rhvoice-voice-name "Artemiy")
+(setq rhvoice-voice-name "Aleksandr")
 
 (defun slovarik-rhvoice-tts (x y)
   (interactive "r")
-  (with-output-to-temp-buffer slovarik--buffer
+  (with-output-to-temp-buffer "slovarik-rhvoice-temp-buffer"
     (let ((cmd (concat "echo «" (remove-newlines (buffer-substring-no-properties x y)) "»|RHVoice-test -p " rhvoice-voice-name)))
       (shell-command cmd))))
+
+(setq slovarik-opus-server-path "./opus-server/query.py") ; path to opus server query.py
+
+(defun query-word-sentences (word lang)
+  (with-output-to-temp-buffer slovarik--buffer
+    (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " ru " "\"" word "\"")))))
+
+(defun slovarik-get-sentences ()
+  (interactive)
+  (query-word-sentences (remove-stress-symbol (thing-at-point 'word)) "ru"))
+
+(defun slovarik-get-en-sentences (x y)
+  (interactive "r")
+  (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))

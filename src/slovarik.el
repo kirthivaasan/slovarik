@@ -215,11 +215,13 @@
 
 (defun query-word-sentences (word lang)
   (with-output-to-temp-buffer slovarik--buffer
-    (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " ru " "\"" word "\"")))))
+    (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " " lang " " "\"" word "\"")))))
 
-(defun slovarik-get-sentences ()
-  (interactive)
-  (query-word-sentences (remove-stress-symbol (thing-at-point 'word)) "ru"))
+;; todo toggle between region/point at word auto/intelligently
+(defun slovarik-get-ru-sentences (x y)
+  (interactive "r")
+  (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "ru"))
+
 
 (defun slovarik-get-en-sentences (x y)
   (interactive "r")

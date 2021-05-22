@@ -105,7 +105,7 @@
 (defun slovarik-lookup-list (word wordlist deflist)
   (let* ((search-res (slovarik-find-words word wordlist))
 	 (words-res (mapcar (lambda (i) (list (aref wordlist i) i)) search-res))
-	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 3)))
+	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
 ;; search with the wordlist, but use the otherlist for resulting keys
@@ -211,18 +211,19 @@
     (let ((cmd (concat "echo «" (remove-newlines (buffer-substring-no-properties x y)) "»|RHVoice-test -p " rhvoice-voice-name)))
       (shell-command cmd))))
 
-(setq slovarik-opus-server-path "./opus-server/query.py") ; path to opus server query.py
+(setq slovarik-opus-server-path "./opus-server/query.py") ; your path to opus-server/query.py
 
 (defun query-word-sentences (word lang)
   (with-output-to-temp-buffer slovarik--buffer
     (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " " lang " " "\"" word "\"")))))
 
 ;; todo toggle between region/point at word auto/intelligently
+;; todo eliminate code repetition for extracting text according to lang from buffer
 (defun slovarik-get-ru-sentences (x y)
   (interactive "r")
-  (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "ru"))
+  (query-word-sentences (concat (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y)))) "ru"))
 
 
 (defun slovarik-get-en-sentences (x y)
   (interactive "r")
-  (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))
+  (query-word-sentences (concat (remove-punctuation (buffer-substring-no-properties x y))) "en"))

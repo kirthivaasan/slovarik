@@ -1,5 +1,4 @@
 (setq slovarik-conjunctions [
-
 "и"
 "где"
 "как"
@@ -86,6 +85,7 @@
 "яко"
 "поелику"
 "то ли"
+"newWord"
 ])
 
 
@@ -177,5 +177,7 @@
 "{dated} like, as, {dated} for, because"
 "{archaic} because, inasmuch as"
 "maybe…or maybe; either…or {q|of an uncertain or unclear choice between possibilities}"
+"newWord means this and that"
+"newWord means this and that"
 ])
 

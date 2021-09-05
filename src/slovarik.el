@@ -18,11 +18,18 @@
 (require 'subr-x)
 
 ;; load lists
-(load "nouns")
-(load "verbs")
-(load "inflections")
+;; src/default/* are the wordlists scraped from WD
+(load "default/nouns")
+(load "default/verbs")
+(load "default/adjectives")
+
+;; src/user/* are the wordlists added by the user
+(load "user/nouns")
+(load "user/verbs")
+(load "user/adjectives")
+
 (load "adverbs")
-(load "adjectives")
+(load "inflections")
 (load "pronouns")
 (load "prepositions")
 (load "prefixes")
@@ -38,6 +45,7 @@
   ;; The minor mode keymap
   `(
     (,(kbd "C-c C-v") . slovarik-auto-lookup)
+    (,(kbd "C-c C-i") . slovarik-insert-word)
    )
    :global 0
 )
@@ -116,28 +124,33 @@
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
 (defun user-lookup (word)
-  (if (is-cyrillic-word (normalize word))
-      (let* ((word (normalize word))
-	     (noun-hits (slovarik-lookup-list word slovarik-nouns slovarik-nouns-defs))
-	     (verb-hits (slovarik-lookup-list word slovarik-verbs slovarik-verbs-defs))
-	     (infl-hits (slovarik-lookup-list-with-otherlist word slovarik-inflections slovarik-verbs-defs slovarik-verbs))
-	     (adj-hits (slovarik-lookup-list word slovarik-adjectives slovarik-adjectives-defs))
-	     (adverb-hits (slovarik-lookup-list word slovarik-adverbs slovarik-adverbs-defs))
-	     (pronoun-hits (slovarik-lookup-list word slovarik-pronouns slovarik-pronouns-defs))
-	     (conjunction-hits (slovarik-lookup-list word slovarik-conjunctions slovarik-conjunctions-defs))
-	     (prep-hits (slovarik-lookup-list word slovarik-prepositions slovarik-prepositions-defs)))
-	(with-output-to-temp-buffer slovarik--buffer
-	  (print-list noun-hits "[NOUN]")
-	  (print-list verb-hits "[verb]")
-	  (print-list infl-hits "[verbal inflection]")
-	  (print-list adverb-hits "[adverb]")
-	  (print-list pronoun-hits "[pronoun]")
-	  (print-list conjunction-hits "[conjunction]")
-	  (print-list adj-hits "[adjective]")
-	  (print-list prep-hits "[preposition]")
-	  ))
-    (message "Not russian word")
-    ))
+  ;; debugging
+  (print (slovarik-lookup-list word slovarik-user-adjectives slovarik-user-adjectives-defs))
+  
+  ;; (if (is-cyrillic-word (normalize word))
+  ;;     (let* ((word (normalize word))
+  ;; 	     (noun-hits (slovarik-lookup-list word slovarik-nouns slovarik-nouns-defs))
+  ;; 	     (verb-hits (slovarik-lookup-list word slovarik-verbs slovarik-verbs-defs))
+  ;; 	     (infl-hits (slovarik-lookup-list-with-otherlist word slovarik-inflections slovarik-verbs-defs slovarik-verbs))
+  ;; 	     (adj-hits (slovarik-lookup-list word slovarik-adjectives slovarik-adjectives-defs))
+  ;; 	     (user-adj-hits (slovarik-lookup-list word slovarik-user-adjectives slovarik-user-adjectives-defs))
+  ;; 	     (adverb-hits (slovarik-lookup-list word slovarik-adverbs slovarik-adverbs-defs))
+  ;; 	     (pronoun-hits (slovarik-lookup-list word slovarik-pronouns slovarik-pronouns-defs))
+  ;; 	     (conjunction-hits (slovarik-lookup-list word slovarik-conjunctions slovarik-conjunctions-defs))
+  ;; 	     (prep-hits (slovarik-lookup-list word slovarik-prepositions slovarik-prepositions-defs)))
+  ;; 	(with-output-to-temp-buffer slovarik--buffer
+  ;; 	  (print-list noun-hits "[NOUN]")
+  ;; 	  (print-list verb-hits "[verb]")
+  ;; 	  (print-list infl-hits "[verbal inflection]")
+  ;; 	  (print-list adverb-hits "[adverb]")
+  ;; 	  (print-list pronoun-hits "[pronoun]")
+  ;; 	  (print-list conjunction-hits "[conjunction]")
+  ;; 	  (print-list adj-hits "[adjective]")
+  ;; 	  (print-list user-adj-hits "[adjective]")
+  ;; 	  (print-list prep-hits "[preposition]")
+  ;; 	  ))
+  ;;   (message "Not russian word"))
+    )
 
 
 ;; punctuation
@@ -225,25 +238,43 @@
   (interactive "r")
   (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))
 
-(defun insert-string-at-word (dest-file string offset-word count)
+(defun slovarik-insert-string-at-word (dest-file string offset-word count)
   (interactive)
   (find-file dest-file)
+  (beginning-of-buffer)
   (search-forward offset-word nil nil count)
   (move-beginning-of-line nil)
   (open-line 1)
   (insert string)
+  (save-buffer)
+  (kill-buffer)
   )
 
-(setq word "\"newWord\"")
-(insert-string-at-word "conjunctions.el" word "])" 1)
-(setq def "\"newWord means this and that\"")
-(insert-string-at-word "conjunctions.el" def "])"  2)
-(save-buffer)
-(kill-buffer)
 
+(defun slovarik-insert-word ()
+  (interactive)
+  (setq word (read-string "Insert word: "))
+  (setq def (read-string "Insert definition: "))
+  
+  (setq word-type (read-string "Insert word type (Aa/Nn/Vv): "))
+  (cond
+   ((or (equal word-type "A") (equal word-type "a"))
+    (setq wordlist "adjectives"))
+   ((or (equal word-type "N") (equal word-type "n"))
+    (setq wordlist "nouns"))
+   ((or (equal word-type "V") (equal word-type "v"))
+    (setq wordlist "verbs"))
+   (t
+    (user-error "%s is not a valid word type, please insert Aa/Nn/Vv" word-type))
+   )
+  (setq wordlist (concat "user/" wordlist ".el"))
+  (slovarik-insert-string-at-word wordlist (concat "\"" word "\"") "])" 1)
+  (slovarik-insert-string-at-word wordlist (concat "\"" def "\"") "])" 2)
+  (message "The word %s has been successfully stored in %s" word wordlist)
+  )
 
+;; debugging
+;; (insert-word "отладочный" "debugging")
 
-;; (Defun slovarik-add-word()
-;;   (interactive)
-;;   (Printg (length (append (list "tryIt") (list slovarik-conjunctions))))
-;;   )
+;; PROBLEM: why is this one not working?
+;; (slovarik-find-words "отладочный" slovarik-user-adjectives)

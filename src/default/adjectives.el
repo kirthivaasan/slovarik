@@ -7427,7 +7427,6 @@
 "моцартовский"
 "вагнеровский"
 "забористый"
-"отладочный"
 ])
 
 
@@ -14860,6 +14859,5 @@
 "Mozartian"
 "Wagnerian"
 "{colloquial} strong, pungent ''(of liquor, tobacco, etc)'', {colloquial} risqué, racy"
-"debug"
 ])
 

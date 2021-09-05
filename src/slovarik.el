@@ -211,7 +211,7 @@
     (let ((cmd (concat "echo «" (remove-newlines (buffer-substring-no-properties x y)) "»|RHVoice-test -p " rhvoice-voice-name)))
       (shell-command cmd))))
 
-(setq slovarik-opus-server-path "./opus-server/query.py") ; path to opus server query.py
+(setq slovarik-opus-server-path "~/.emacs.d/eval_these/slovarik/opus-server/query.py") ; path to opus server query.py
 
 (defun query-word-sentences (word lang)
   (with-output-to-temp-buffer slovarik--buffer
@@ -224,3 +224,26 @@
 (defun slovarik-get-en-sentences (x y)
   (interactive "r")
   (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))
+
+(defun insert-string-at-word (dest-file string offset-word count)
+  (interactive)
+  (find-file dest-file)
+  (search-forward offset-word nil nil count)
+  (move-beginning-of-line nil)
+  (open-line 1)
+  (insert string)
+  )
+
+(setq word "\"newWord\"")
+(insert-string-at-word "conjunctions.el" word "])" 1)
+(setq def "\"newWord means this and that\"")
+(insert-string-at-word "conjunctions.el" def "])"  2)
+(save-buffer)
+(kill-buffer)
+
+
+
+;; (Defun slovarik-add-word()
+;;   (interactive)
+;;   (Printg (length (append (list "tryIt") (list slovarik-conjunctions))))
+;;   )

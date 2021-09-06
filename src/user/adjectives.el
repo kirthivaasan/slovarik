@@ -1,9 +1,9 @@
 (setq slovarik-user-adjectives [
-				
-"отладочный"
-				])
+				"отладочный"
+				"авыф"
+])
 
 (setq slovarik-user-adjectives-defs [
-				     
-"debugging"
-				     ])
+				     "debugging"
+				     "hslsl"
+])

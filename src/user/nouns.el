@@ -1,7 +1,9 @@
 (setq slovarik-user-nouns[
-"newWord"
+"куцй"
+"гшщз"
 			   ])
 
 (setq slovarik-user-nouns-defs[
-"newWord means this and that"
+"fdsa"
+"hdlaf"
 				])

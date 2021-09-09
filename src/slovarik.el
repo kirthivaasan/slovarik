@@ -17,6 +17,9 @@
 (require 'ansi-color)
 (require 'subr-x)
 
+;; loads user specific configuration variables
+;; (load "user/config")
+
 ;; load lists
 ;; src/default/* are the wordlists scraped from WD
 (load "default/nouns")
@@ -275,7 +278,29 @@
   (message "The word %s has been successfully stored in %s" word wordlist)
   )
 
-;; debugging
+(defun slovarik-set-home()
+  (interactive)
+  (let ((slovarik-home-tmp (concat (getenv "HOME") "/.emacs.d/slovarik")))
+    (if (not (boundp 'slovarik-home))
+       (setq slovarik-home
+	     (read-string
+	      (format "Insert the path to slovarik [%s]: " slovarik-home-tmp)))
+     ;; else
+     (setq slovarik-home slovarik-home-tmp)))
+  (message slovarik-home)
+  (makunbound 'slovarik-home)
+)      
+
+(defun slovarik-generate-user-dir()
+  (interactive)
+  (slovarik-set-home)
+  ;; check slovarik-home/user exists if it doesn't create
+  ;; and init slovarik-home
+  
+  )
+
+
+;; Debugging
 ;; (insert-word "отладочный" "debugging")
 
 ;; PROBLEM: why is this one not working?

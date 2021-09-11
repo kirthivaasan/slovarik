@@ -14,6 +14,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+;; Packages
 (require 'ansi-color)
 (require 'subr-x)
 
@@ -287,18 +288,46 @@
 	      (format "Insert the path to slovarik [%s]: " slovarik-home-tmp)))
      ;; else
      (setq slovarik-home slovarik-home-tmp)))
-  (message slovarik-home)
-  (makunbound 'slovarik-home)
+  (message (concat "slovarik-home=" slovarik-home))
+  ;; (makunbound 'slovarik-home)
 )      
 
 (defun slovarik-generate-user-dir()
   (interactive)
   (slovarik-set-home)
-  ;; check slovarik-home/user exists if it doesn't create
-  ;; and init slovarik-home
+  (if (not (file-exists-p (concat slovarik-home "/src/user")))
+      (progn
+	(make-directory (concat slovarik-home "/src/user") t)
+	(slovarik-create-user-files slovarik-home))
+    ))
+
+(defun slovarik-create-user-files(home-path)
+  (slovarik-create-user-config-file home-path)
   
   )
 
+(defun slovarik-create-user-config-file(home-path)
+  (let ((conf-buf-name "conf"))
+    (let ((conf-buf (generate-new-buffer conf-buf-name)))
+      (set-buffer conf-buf)
+      (insert (format "(setq slovarik-home \"%s\")" home-path))
+      (write-file (concat home-path "/src/user/" conf-buf-name ".el"))
+      )
+    )
+  )
+
+(defun slovarik-init-user-wordlist(home-path wordlist-name)
+  "Home and wordlist name"
+  (interactive (list "~/slovarik-try" "n"))
+  (let (( full-wordlist-name
+	  (cond ((equal wordlist-name "n") "nouns")
+		((equal wordlist-name "a") "adjectives")
+		((equal wordlist-name "v") "verbs")
+		(t nil)
+		)))
+    (if (full-wordlist-name nil))
+	(message full-wordlist-name))
+  )
 
 ;; Debugging
 ;; (insert-word "отладочный" "debugging")

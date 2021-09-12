@@ -20,6 +20,7 @@
 
 ;; user configurations >
 ;; user configurations #
+;; HACK: don't delete the previous line!
 
 ;; load lists
 ;; src/default/* are the wordlists scraped from WD
@@ -45,6 +46,7 @@
   `(
     (,(kbd "C-c C-v") . slovarik-auto-lookup)
     (,(kbd "C-c C-i") . slovarik-insert-word)
+    (,(kbd "C-c C-r C-u") . slovarik-reset-user-env)
    )
    :global 0
 )
@@ -122,6 +124,8 @@
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
+;; TODO: fix bug on slovarik-user-nouns by commenting and uncommenting those lines each time the user
+;;       env is reset and set, respectively
 (defun user-lookup (word)
   (if (is-cyrillic-word (normalize word))
       (let* ((word (normalize word))
@@ -238,6 +242,14 @@
   (interactive "r")
   (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))
 
+;; helpers of slovarik-insert-word >
+(defun slovarik-set-home()
+  "Sets slovarik home."
+    (if (not (boundp 'slovarik-home))
+       (setq slovarik-home
+	     (string-remove-suffix "/" (read-file-name "Insert the path to slovarik: "))))
+  (message (concat "slovarik-home=" slovarik-home)) )
+
 (defun slovarik-insert-string-at-word (dest-file string offset-word count)
   "Opens DEST-FILE and inserts STRING to the line next to the COUNT-th match of OFFSET-WORD.
 
@@ -255,63 +267,8 @@ COUNT - match count"
   (kill-buffer)
   )
 
-(defun slovarik-insert-word ()
-  "Insert <word> into <slovarik-home>/src/user/<wordlist>.el, where <word> and <wordlist> are prompted."
-  (interactive)
-  (setq word (read-string "Insert word: "))
-  (setq def (read-string "Insert definition: "))
-  
-  (setq word-type (read-string "Insert word type (Aa/Nn/Vv): "))
-  (cond
-   ((or (equal word-type "A") (equal word-type "a"))
-    (setq wordlist "adjectives"))
-   ((or (equal word-type "N") (equal word-type "n"))
-    (setq wordlist "nouns"))
-   ((or (equal word-type "V") (equal word-type "v"))
-    (setq wordlist "verbs"))
-   (t
-    (user-error "%s is not a valid word type, please insert Aa/Nn/Vv" word-type))
-   )
-  (slovarik-set-home)
-  (setq wordlist (concat slovarik-home "/user/" wordlist ".el"))
-  (slovarik-insert-string-at-word wordlist (concat "\"" word "\"") "])" 1)
-  (slovarik-insert-string-at-word wordlist (concat "\"" def "\"") "])" 2)
-  (load wordlist)
-  (message "The word %s has been successfully stored in %s" word wordlist)
-  )
-
-(defun slovarik-set-home()
-  "Sets slovarik home."
-  (interactive)
-  (let ((slovarik-home-tmp (concat (getenv "HOME") "/.emacs.d/slovarik")))
-    (if (not (boundp 'slovarik-home))
-       (setq slovarik-home
-	     (read-string
-	      (format "Insert the path to slovarik [%s]: " slovarik-home-tmp)))
-     ;; else
-     (setq slovarik-home slovarik-home-tmp)))
-  (message (concat "slovarik-home=" slovarik-home)) )      
-  ;; (makunbound 'slovarik-home)
-
-(defun slovarik-init-user-env()
-  "Initialise the user environment in HOME-PATH/src/user.
-
-HOME-PATH - slovarik home"
-  (interactive)
-  (slovarik-set-home)
-  (if (not (file-exists-p (concat slovarik-home "/src/user")))
-      (progn
-	(make-directory (concat slovarik-home "/src/user") t)
-	(slovarik-init-user-config-file slovarik-home)
-	(slovarik-init-user-wordlist slovarik-home "n")
-	(slovarik-init-user-wordlist slovarik-home "v")
-	(slovarik-init-user-wordlist slovarik-home "a")
-	(load (format "%s/src/user/conf.el" slovarik-home))
-	(message (format "User environment correctly setup in %s/src/user" slovarik-home)))) )
-
-
 (defun slovarik-init-user-config-file(home-path)
-  "Writes slovarik-home variable in src/user/conf.el.
+  "Writes slovarik-home variable in /src/user/conf.el.
 
 HOME-PATH - slovarik home"
   (let* ((conf-fn "conf")
@@ -329,41 +286,6 @@ HOME-PATH - slovarik home"
        ";; user configurations #" 1)
       )
   )
-
-(defun slovarik-reset-user-configuration()
-  "Deletes the user environment."
-  (interactive)
-  (if (boundp 'slovarik-home)
-      (progn
-	(let ((path-to-user (format "%s/src/user" slovarik-home)))
-	  (if (file-exists-p path-to-user)
-	      (progn
-		;; delete user's directory
-		(delete-directory  path-to-user t)
-		(message (format "%s deleted" path-to-user)))
-	    (message (format "%s doesn't exist" path-to-user)))
-	  
-	  (condition-case nil
-	      (progn
-		;; delete stm load user's configuration
-		(find-file (format "%s/src/slovarik.el" slovarik-home))
-		(beginning-of-buffer)
-		(search-forward (format "(load \"%s/conf.el\")" path-to-user))
-		(beginning-of-line)
-		(kill-line)
-		(kill-line)    
-		(save-buffer)
-		(kill-buffer)
-		(message (format "Stm (load \"%s/conf.el\") removed from slovarik.el" path-to-user)))
-            (error
-	     (progn
-	       (message (format "Stm (load \"%s/conf.el\") not found in slovarik.el" path-to-user))
-	       (kill-buffer))
-	     )))
-    	(makunbound 'slovarik-home)
-	(message "slovarik-home unset"))
-    (message "Impossible to delete user environment: slovarik-home not set"))
-  (message "User env successfully reset")) 
 
 (defun slovarik-init-user-wordlist(home-path wordlist-id)
   "Initialise the user's wordlist as specified by WORDLIST-ID.
@@ -403,5 +325,83 @@ WORDLIST-ID - wordlist identifier to be initialised. Identifiers resolve to eith
 	      (kill-buffer conf-buf)
 	      (message (format "User wordlist %s initialised" full-path-to-wordlist)) ) ) ) ) )
 
-;; Debugging
-;; (insert-word "отладочный" "debugging")
+(defun slovarik-init-user-env()
+  "Initialise the user environment in HOME-PATH/src/user.
+
+HOME-PATH - slovarik home"
+  (slovarik-set-home)
+  (if (not (file-exists-p (concat slovarik-home "/src/user")))
+      (progn
+	(make-directory (concat slovarik-home "/src/user") t)
+	(slovarik-init-user-config-file slovarik-home)
+	(slovarik-init-user-wordlist slovarik-home "n")
+	(slovarik-init-user-wordlist slovarik-home "v")
+	(slovarik-init-user-wordlist slovarik-home "a")
+	(load (format "%s/src/user/conf.el" slovarik-home))
+	(message (format "User environment correctly setup in %s/src/user" slovarik-home)))) )
+;; helpers of slovarik-insert-word #
+
+(defun slovarik-insert-word ()
+  "Insert <word> into <slovarik-home>/src/user/<wordlist>.el, where <word> and <wordlist> are prompted."
+  (interactive)
+  (slovarik-init-user-env)
+  (setq word (read-string "Insert word: "))
+  (setq def (read-string "Insert definition: "))
+  
+  (setq word-type (read-string "Insert word type (Aa/Nn/Vv): "))
+  (cond
+   ((or (equal word-type "A") (equal word-type "a"))
+    (setq wordlist "adjectives"))
+   ((or (equal word-type "N") (equal word-type "n"))
+    (setq wordlist "nouns"))
+   ((or (equal word-type "V") (equal word-type "v"))
+    (setq wordlist "verbs"))
+   (t
+    (user-error "%s is not a valid word type, please insert Aa/Nn/Vv" word-type))
+   )
+  (slovarik-set-home)
+  (setq wordlist (concat slovarik-home "/src/user/" wordlist ".el"))
+  (slovarik-insert-string-at-word wordlist (concat "\"" word "\"") "])" 1)
+  (slovarik-insert-string-at-word wordlist (concat "\"" def "\"") "])" 2)
+  (load wordlist)
+  (message "The word %s has been successfully stored in %s" word wordlist)
+  )
+
+(defun slovarik-reset-user-env()
+  "Deletes the user environment."
+  (interactive)
+  (if (y-or-n-p "Deleting the user environment, continue?")
+      (if (boundp 'slovarik-home)
+	  (progn
+	    (let ((path-to-user (format "%s/src/user" slovarik-home)))
+	      (if (file-exists-p path-to-user)
+		  (progn
+		    ;; delete user's directory
+		    (delete-directory  path-to-user t)
+		    (message (format "%s deleted" path-to-user)))
+		(message (format "%s doesn't exist" path-to-user)))
+	      
+	      (condition-case nil
+		  (progn
+		    ;; delete stm load user's configuration
+		    (find-file (format "%s/src/slovarik.el" slovarik-home))
+		    (beginning-of-buffer)
+		    (search-forward (format "(load \"%s/conf.el\")" path-to-user))
+		    (beginning-of-line)
+		    (kill-line)
+		    (kill-line)    
+		    (save-buffer)
+		    (kill-buffer)
+		    (message (format "Stm (load \"%s/conf.el\") removed from slovarik.el" path-to-user)))
+		(error
+		 (progn
+		   (message (format "Stm (load \"%s/conf.el\") not found in slovarik.el" path-to-user))
+		   (kill-buffer))
+		 )))
+    	    (makunbound 'slovarik-home)
+	    (message "slovarik-home unset")
+	    (message "User env successfully reset")
+	    ;; TODO: add here function to erase content of user's wordlists
+	    )
+	(message "Impossible to delete user environment: slovarik-home not set"))
+    (message "User environment reset cancelled")))

@@ -1,55 +1,55 @@
 
-;; Copyright (c) 2020 kirthip
+;; ;; Copyright (c) 2020 kirthip
 
-;; This program is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; ;; This program is free software: you can redistribute it and/or modify
+;; ;; it under the terms of the GNU General Public License as published by
+;; ;; the Free Software Foundation, either version 3 of the License, or
+;; ;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; ;; This program is distributed in the hope that it will be useful,
+;; ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; ;; GNU General Public License for more details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+;; ;; You should have received a copy of the GNU General Public License
+;; ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-;; Packages
-(require 'ansi-color)
-(require 'subr-x)
+;; ;; Packages
+;; (require 'ansi-color)
+;; (require 'subr-x)
 
-;; user configurations >
-;; user configurations #
-;; HACK: don't delete the previous line!
+;; ;; user configurations >
+;; ;; user configurations #
+;; ;; HACK: don't delete the previous line!
 
-;; load lists
-;; src/default/* are the wordlists scraped from WD
-(load "default/nouns")
-(load "default/verbs")
-(load "default/adjectives")
+;; ;; load lists
+;; ;; src/default/* are the wordlists scraped from WD
+;; (load "default/nouns")
+;; (load "default/verbs")
+;; (load "default/adjectives")
 
-(load "adverbs")
-(load "inflections")
-(load "pronouns")
-(load "prepositions")
-(load "prefixes")
-(load "conjunctions")
+;; (load "adverbs")
+;; (load "inflections")
+;; (load "pronouns")
+;; (load "prepositions")
+;; (load "prefixes")
+;; (load "conjunctions")
 
-(load "stemmer")
+;; (load "stemmer")
 
-;; user controls
-(define-minor-mode slovarik-mode
-  "A dictionary for translating russian."
-  nil
-  " Slovarik"
-  ;; The minor mode keymap
-  `(
-    (,(kbd "C-c C-v") . slovarik-auto-lookup)
-    (,(kbd "C-c C-i") . slovarik-insert-word)
-    (,(kbd "C-c C-r C-u") . slovarik-reset-user-env)
-   )
-   :global 0
-)
+;; ;; user controls
+;; (define-minor-mode slovarik-mode
+;;   "A dictionary for translating russian."
+;;   nil
+;;   " Slovarik"
+;;   ;; The minor mode keymap
+;;   `(
+;;     (,(kbd "C-c C-v") . slovarik-auto-lookup)
+;;     (,(kbd "C-c C-i") . slovarik-insert-word)
+;;     (,(kbd "C-c C-r C-u") . slovarik-reset-user-env)
+;;    )
+;;    :global 0
+;; )
 
 (defun normalize (word)
   (remove-stress-symbol (subst-char-in-string ?ё ?е word)))
@@ -279,9 +279,9 @@ HOME-PATH - slovarik home"
       (insert (format "(setq slovarik-home \"%s\")\n" home-path))
       (write-file full-path-to-user-conf)
       (kill-buffer conf-buf)
-      ;; insert (load src/user/conf.el) to src/slovarik.el
+      ;; insert (load src/user/conf.el) to slovarik.el
       (slovarik-insert-string-at-word
-       (concat home-path "/src/slovarik.el")
+       (concat home-path "/slovarik.el")
        (format "(load \"%s\")" full-path-to-user-conf)
        ";; user configurations #" 1)
       )
@@ -384,7 +384,7 @@ HOME-PATH - slovarik home"
 	      (condition-case nil
 		  (progn
 		    ;; delete stm load user's configuration
-		    (find-file (format "%s/src/slovarik.el" slovarik-home))
+		    (find-file (format "%s/slovarik.el" slovarik-home))
 		    (beginning-of-buffer)
 		    (search-forward (format "(load \"%s/conf.el\")" path-to-user))
 		    (beginning-of-line)

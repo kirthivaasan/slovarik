@@ -1,4 +1,3 @@
-
 ;; ;; Copyright (c) 2020 kirthip
 
 ;; ;; This program is free software: you can redistribute it and/or modify
@@ -13,43 +12,6 @@
 
 ;; ;; You should have received a copy of the GNU General Public License
 ;; ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-;; ;; Packages
-;; (require 'ansi-color)
-;; (require 'subr-x)
-
-;; ;; user configurations >
-;; ;; user configurations #
-;; ;; HACK: don't delete the previous line!
-
-;; ;; load lists
-;; ;; src/default/* are the wordlists scraped from WD
-;; (load "default/nouns")
-;; (load "default/verbs")
-;; (load "default/adjectives")
-
-;; (load "adverbs")
-;; (load "inflections")
-;; (load "pronouns")
-;; (load "prepositions")
-;; (load "prefixes")
-;; (load "conjunctions")
-
-;; (load "stemmer")
-
-;; ;; user controls
-;; (define-minor-mode slovarik-mode
-;;   "A dictionary for translating russian."
-;;   nil
-;;   " Slovarik"
-;;   ;; The minor mode keymap
-;;   `(
-;;     (,(kbd "C-c C-v") . slovarik-auto-lookup)
-;;     (,(kbd "C-c C-i") . slovarik-insert-word)
-;;     (,(kbd "C-c C-r C-u") . slovarik-reset-user-env)
-;;    )
-;;    :global 0
-;; )
 
 (defun normalize (word)
   (remove-stress-symbol (subst-char-in-string ?ё ?е word)))

@@ -86,33 +86,25 @@
 	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
-;; TODO: fix bug on slovarik-user-nouns by commenting and uncommenting those lines each time the user
-;;       env is reset and set, respectively
 (defun user-lookup (word)
   (if (is-cyrillic-word (normalize word))
       (let* ((word (normalize word))
 	     (noun-hits (slovarik-lookup-list word slovarik-nouns slovarik-nouns-defs))
-	     (user-noun-hits (slovarik-lookup-list word slovarik-user-nouns slovarik-user-nouns-defs))	     
 	     (verb-hits (slovarik-lookup-list word slovarik-verbs slovarik-verbs-defs))
-	     (user-verb-hits (slovarik-lookup-list word slovarik-user-verbs slovarik-user-verbs-defs))	     
 	     (infl-hits (slovarik-lookup-list-with-otherlist word slovarik-inflections slovarik-verbs-defs slovarik-verbs))
 	     (adj-hits (slovarik-lookup-list word slovarik-adjectives slovarik-adjectives-defs))
-	     (user-adj-hits (slovarik-lookup-list word slovarik-user-adjectives slovarik-user-adjectives-defs))
 	     (adverb-hits (slovarik-lookup-list word slovarik-adverbs slovarik-adverbs-defs))
 	     (pronoun-hits (slovarik-lookup-list word slovarik-pronouns slovarik-pronouns-defs))
 	     (conjunction-hits (slovarik-lookup-list word slovarik-conjunctions slovarik-conjunctions-defs))
 	     (prep-hits (slovarik-lookup-list word slovarik-prepositions slovarik-prepositions-defs)))
 	(with-output-to-temp-buffer slovarik--buffer
 	  (print-list noun-hits "[NOUN]")
-	  (print-list user-noun-hits "[NOUN]")
 	  (print-list verb-hits "[verb]")
-	  (print-list user-verb-hits "[verb]")	  
 	  (print-list infl-hits "[verbal inflection]")
 	  (print-list adverb-hits "[adverb]")
 	  (print-list pronoun-hits "[pronoun]")
 	  (print-list conjunction-hits "[conjunction]")
 	  (print-list adj-hits "[adjective]")
-	  (print-list user-adj-hits "[adjective]")
 	  (print-list prep-hits "[preposition]")
 	  ))
     (message "Not russian word"))
@@ -249,6 +241,12 @@ HOME-PATH - slovarik home"
       )
   )
 
+(defun slovarik-format-empty-vconcat(wordlist-var)
+  (let (( wordlist-var-full (format "slovarik-%s" wordlist-var)))
+    (format "(setq %s (vconcat %s [\n\t\t\t]))\n\n" wordlist-var-full wordlist-var-full)
+    )
+  )
+
 (defun slovarik-init-user-wordlist(home-path wordlist-id)
   "Initialise the user's wordlist as specified by WORDLIST-ID.
 
@@ -268,16 +266,15 @@ WORDLIST-ID - wordlist identifier to be initialised. Identifiers resolve to eith
 	(user-error "Choose a valid wordlist identifier: n/a/v")
       (progn
 	(message (format "Wordlist \"%s\" selected" full-wordlist-id))
-	(let* ((empty-list-format "[\n\t\t\t]")
-	       (full-path-to-wordlist (concat home-path "/src/user/" full-wordlist-id ".el"))
+	(let* ((full-path-to-wordlist (concat home-path "/src/user/" full-wordlist-id ".el"))
 	       (wordlist-buf (generate-new-buffer full-wordlist-id))
 	       (conf-fn "conf")
 	       (conf-buf (generate-new-buffer conf-fn)))
 
 	      ;; add empty lists to wordlist file
 	      (set-buffer wordlist-buf) 
-	      (insert (format "(setq slovarik-user-%s %s)\n\n" full-wordlist-id empty-list-format))
-	      (insert (format "(setq slovarik-user-%s-defs %s)" full-wordlist-id empty-list-format))
+	      (insert (slovarik-format-empty-vconcat full-wordlist-id))
+	      (insert (slovarik-format-empty-vconcat (format "%s-defs" full-wordlist-id)))
 	      (write-file full-path-to-wordlist)
 	      (kill-buffer wordlist-buf)
 	      ;; add load smt to src/user/conf.el

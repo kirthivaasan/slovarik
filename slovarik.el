@@ -17,10 +17,6 @@
 (require 'ansi-color)
 (require 'subr-x)
 
-;; user configurations >
-;; user configurations #
-;; HACK: don't delete the previous line!
-
 ;; load lists
 ;; src/default/* are the wordlists scraped from WD
 (load "src/default/nouns")
@@ -33,6 +29,10 @@
 (load "src/prepositions")
 (load "src/prefixes")
 (load "src/conjunctions")
+
+;; user configurations >
+;; user configurations #
+;; HACK: don't delete the previous line!
 
 (load "src/stemmer")
 (load "src/commands")

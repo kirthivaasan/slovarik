@@ -31,6 +31,7 @@
 (load "src/conjunctions")
 
 ;; user configurations >
+(load "/home/maks/.emacs.d/eval_these/slovarik/src/user/conf.el")
 ;; user configurations #
 ;; HACK: don't delete the previous line!
 

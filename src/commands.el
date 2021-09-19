@@ -76,7 +76,7 @@
 (defun slovarik-lookup-list (word wordlist deflist)
   (let* ((search-res (slovarik-find-words word wordlist))
 	 (words-res (mapcar (lambda (i) (list (aref wordlist i) i)) search-res))
-	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 3)))
+	 (topresults (seq-take (sort words-res (lambda (w i) (length w))) 5)))
     (mapcar (lambda (w) (list (car w) (aref deflist (elt w 1)))) topresults)))
 
 ;; search with the wordlist, but use the otherlist for resulting keys
@@ -182,26 +182,27 @@
     (let ((cmd (concat "echo «" (remove-newlines (buffer-substring-no-properties x y)) "»|RHVoice-test -p " rhvoice-voice-name)))
       (shell-command cmd))))
 
-(setq slovarik-opus-server-path "~/.emacs.d/eval_these/slovarik/opus-server/query.py") ; path to opus server query.py
-
 (defun query-word-sentences (word lang)
   (with-output-to-temp-buffer slovarik--buffer
-    (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " ru " "\"" word "\"")))))
+    (print (shell-command-to-string (concat "python3 " slovarik-opus-server-path " " lang " " "\"" word "\"")))))
 
-(defun slovarik-get-sentences ()
-  (interactive)
-  (query-word-sentences (remove-stress-symbol (thing-at-point 'word)) "ru"))
+;; todo toggle between region/point at word auto/intelligently
+;; todo eliminate code repetition for extracting text according to lang from buffer
+(defun slovarik-get-ru-sentences (x y)
+  (interactive "r")
+  (query-word-sentences (concat (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y)))) "ru"))
 
+;; todo eliminate code repetition for extracting text according to lang from buffer
 (defun slovarik-get-en-sentences (x y)
   (interactive "r")
-  (query-word-sentences (concat "\"" (remove-punctuation (remove-stress-symbol (buffer-substring-no-properties x y))) "\"") "en"))
+  (query-word-sentences (concat (remove-punctuation (buffer-substring-no-properties x y))) "en"))
 
 ;; helpers of slovarik-insert-word >
 (defun slovarik-set-home()
   "Sets slovarik home."
     (if (not (boundp 'slovarik-home))
        (setq slovarik-home
-	     (string-remove-suffix "/" (read-file-name "Insert the path to slovarik: "))))
+	     (string-remove-suffix "/" (read-directory-name "Insert the path to slovarik: "))))
   (message (concat "slovarik-home=" slovarik-home)) )
 
 (defun slovarik-insert-string-at-word (dest-file string offset-word count)
@@ -299,6 +300,10 @@ HOME-PATH - slovarik home"
 	(load (format "%s/src/user/conf.el" slovarik-home))
 	(message (format "User environment correctly setup in %s/src/user" slovarik-home)))) )
 ;; helpers of slovarik-insert-word #
+
+;; sets slovarik-home and persist it in <slovarik-home>/src/user/conf.el
+(slovarik-init-user-env)
+(setq slovarik-opus-server-path (format "%s/opus-server/query.py" slovarik-home))
 
 (defun slovarik-insert-word ()
   "Insert <word> into <slovarik-home>/src/user/<wordlist>.el, where <word> and <wordlist> are prompted."
